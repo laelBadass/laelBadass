@@ -1,51 +1,61 @@
-import cmath  # For complex number operations
+import customtkinter as ctk
+import numpy as np
 
-def calculate_normalized_admittance(Z, Z0):
-    """
-    Calculate normalized admittance (Yn) from impedance (Z) for a given characteristic impedance (Z0).
-    
-    Yn = 1 / Zn, where Zn = Z / Z0
-    """
-    Zn = Z / Z0  # Normalize the impedance
-    Yn = 1 / Zn  # Compute the normalized admittance
-    return Yn
+class ComplexNumberApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Complex Number Calculator")
 
-def calculate_normalized_impedance_from_Gamma(Gamma):
-    """
-    Calculate normalized impedance (Zn) from reflection coefficient (Gamma).
-    
-    Zn = (1 + Gamma) / (1 - Gamma)
-    """
-    if Gamma == 1:
-        raise ValueError("Gamma = 1 results in infinite impedance!")
-    Zn = (1 + Gamma) / (1 - Gamma)
-    return Zn
+        # Title Label
+        ctk.CTkLabel(root, text="Enter 4 Complex Numbers:", font=("Arial", 14)).grid(row=0, column=0, columnspan=2, pady=10)
 
-def calculate_normalized_impedance_from_admittance(Y, Z0):
-    """
-    Calculate normalized impedance (Zn) from admittance (Y) for a given characteristic impedance (Z0).
-    
-    Yn = Y * Z0
-    Zn = 1 / Yn
-    """
-    Yn = Y * Z0  # Compute normalized admittance
-    Zn = 1 / Yn  # Compute normalized impedance
-    return Zn
+        # Entry Fields for Complex Numbers
+        self.entries = []
+        for i in range(4):
+            ctk.CTkLabel(root, text=f"Value {i+1}:").grid(row=i+1, column=0, padx=5, pady=5)
+            entry = ctk.CTkEntry(root, width=150)
+            entry.grid(row=i+1, column=1, padx=5, pady=5)
+            self.entries.append(entry)
 
-# Example usage:
-Z = complex(25, -25)  # Example impedance (30 + j40 Ohm)
-Z0 = 50  # Characteristic impedance (Ohm)
-Gamma = complex(0.3, 0.4)  # Example reflection coefficient
-Y = complex(1, 1)  # Example admittance (Siemens)
+        # Buttons for Calculating Average & Median
+        self.avg_button = ctk.CTkButton(root, text="Calculate Average", command=self.calculate_average)
+        self.avg_button.grid(row=5, column=0, pady=10)
 
-# Calculating normalized admittance from impedance
-Yn = calculate_normalized_admittance(Z, Z0)
-print(f"Normalized Admittance: {Yn:.4f}")
+        self.median_button = ctk.CTkButton(root, text="Calculate Median", command=self.calculate_median)
+        self.median_button.grid(row=5, column=1, pady=10)
 
-# Calculating normalized impedance from reflection coefficient
-Zn_from_Gamma = calculate_normalized_impedance_from_Gamma(Gamma)
-print(f"Normalized Impedance from Reflection Coefficient: {Zn_from_Gamma:.4f}")
+        # Labels to Display Results
+        self.avg_label = ctk.CTkLabel(root, text="Average: --", font=("Arial", 12))
+        self.avg_label.grid(row=6, column=0, columnspan=2, pady=5)
 
-# Calculating normalized impedance from admittance
-Zn_from_Y = calculate_normalized_impedance_from_admittance(Y, Z0)
-print(f"Normalized Impedance from Admittance: {Zn_from_Y:.4f}")
+        self.median_label = ctk.CTkLabel(root, text="Median: --", font=("Arial", 12))
+        self.median_label.grid(row=7, column=0, columnspan=2, pady=5)
+
+    def get_complex_numbers(self):
+        """Fetch and convert user input to complex numbers."""
+        try:
+            complex_numbers = [complex(entry.get()) for entry in self.entries]
+            return complex_numbers
+        except ValueError:
+            self.avg_label.configure(text="Error: Invalid Input", text_color="red")
+            self.median_label.configure(text="Error: Invalid Input", text_color="red")
+            return None
+
+    def calculate_average(self):
+        """Calculate the average of the input complex numbers."""
+        numbers = self.get_complex_numbers()
+        if numbers:
+            avg = sum(numbers) / len(numbers)
+            self.avg_label.configure(text=f"Average: {avg}")
+
+    def calculate_median(self):
+        """Calculate the median of the input complex numbers."""
+        numbers = self.get_complex_numbers()
+        if numbers:
+            median = np.median(numbers)
+            self.median_label.configure(text=f"Median: {median}")
+
+# Run the application
+root = ctk.CTk()
+app = ComplexNumberApp(root)
+root.mainloop()
